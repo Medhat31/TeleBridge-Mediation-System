@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nodes - TeleBridge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/nodes.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Top Navbar -->
+        <nav class="top-navbar">
+            <div class="navbar-brand">
+                <i class="fa-solid fa-layer-group"></i> TeleBridge
+            </div>
+            
+            <div class="navbar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <i class="fa-solid fa-chart-pie"></i> Overview
+                </a>
+                <a href="nodes.html" class="nav-item active">
+                    <i class="fa-solid fa-server"></i> Network Nodes
+                </a>
+                <a href="rules.html" class="nav-item">
+                    <i class="fa-solid fa-filter"></i> Mediation Rules
+                </a>
+            </div>
+
+            <div class="navbar-user">
+                <a href="index.html" class="nav-item">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                </a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <h1 class="page-title">Network Nodes</h1>
+                <div class="user-profile">
+                    <button class="btn btn-primary" id="btn-add-node">
+                        <i class="fa-solid fa-plus"></i> Add New Node
+                    </button>
+                </div>
+            </header>
+
+            <div class="glass-panel">
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Node Name</th>
+                                <th>Type</th>
+                                <th>Protocol</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="nodes-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Node Modal -->
+    <div class="modal-overlay" id="node-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add Network Node</h3>
+                <button class="modal-close" id="btn-close-modal"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="node-form">
+                    <input type="hidden" id="node-id">
+                    <div class="form-group">
+                        <label>Node Name</label>
+                        <input type="text" class="form-control" id="nodeName" placeholder="e.g. Cairo_MSC_01" required>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label>Node Type</label>
+                            <select class="form-control" id="nodeType">
+                                <option value="UPSTREAM">UPSTREAM</option>
+                                <option value="DOWNSTREAM">DOWNSTREAM</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Protocol</label>
+                            <select class="form-control" id="protocol">
+                                <option value="FTP">FTP</option>
+                                <option value="SFTP">SFTP</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" class="form-control" id="username" placeholder="admin">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" class="form-control" id="password" placeholder="***">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="btn-cancel-modal">Cancel</button>
+                <button class="btn btn-primary" id="btn-save-modal">Save Node</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Client & Nodes Script -->
+    <script src="js/api.js?v=7"></script>
+    <script src="js/ui.js?v=7"></script>
+    <script src="js/nodes.js?v=7"></script>
+</body>
+</html>

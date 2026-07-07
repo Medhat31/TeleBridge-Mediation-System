@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mediation Rules - TeleBridge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/rules.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Top Navbar -->
+        <nav class="top-navbar">
+            <div class="navbar-brand">
+                <i class="fa-solid fa-layer-group"></i> TeleBridge
+            </div>
+            
+            <div class="navbar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <i class="fa-solid fa-chart-pie"></i> Overview
+                </a>
+                <a href="nodes.html" class="nav-item">
+                    <i class="fa-solid fa-server"></i> Network Nodes
+                </a>
+                <a href="rules.html" class="nav-item active">
+                    <i class="fa-solid fa-filter"></i> Mediation Rules
+                </a>
+            </div>
+
+            <div class="navbar-user">
+                <a href="index.html" class="nav-item">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                </a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <h1 class="page-title">Mediation Rules</h1>
+                <div class="user-profile">
+                    <button class="btn btn-primary" id="btn-add-rule">
+                        <i class="fa-solid fa-plus"></i> Add New Rule
+                    </button>
+                </div>
+            </header>
+
+            <div class="glass-panel">
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Source Node</th>
+                                <th>Destination Node</th>
+                                <th>Filter Zero-Duration</th>
+                                <th>Filter Emergency</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rules-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Rule Modal -->
+    <div class="modal-overlay" id="rule-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Create Mediation Rule</h3>
+                <button class="modal-close" id="btn-close-modal"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="rule-form">
+                    <input type="hidden" id="rule-id">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label>Source Node (Upstream)</label>
+                            <select class="form-control" id="sourceNodeId">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Destination Node (Downstream)</label>
+                            <select class="form-control" id="destinationNodeId">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 2rem; margin-top: 1rem; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div style="font-weight: 500; margin-bottom: 0.25rem;">Filter Zero-Duration Calls</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">Drop calls with 0s duration</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="filterZeroDuration" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div style="display: flex; gap: 2rem; margin-top: 1.5rem; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div style="font-weight: 500; margin-bottom: 0.25rem;">Filter Emergency Calls</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">Drop calls to 911/112</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="filterEmergency" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="btn-cancel-modal">Cancel</button>
+                <button class="btn btn-primary" id="btn-save-modal">Save Rule</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Client & Rules Script -->
+    <script src="js/api.js?v=7"></script>
+    <script src="js/ui.js?v=7"></script>
+    <script src="js/rules.js?v=7"></script>
+</body>
+</html>

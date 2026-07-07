@@ -1,0 +1,38 @@
+# === Sensitive Config ===
+**/db.properties
+.env
+
+# === Java Build Artifacts ===
+/core/target/
+*.class
+*.jar
+*.war
+
+# === IDE Files ===
+.idea/
+*.iml
+.vscode/
+nbproject/
+nbactions.xml
+*.swp
+*.swo
+
+# === Runtime Data ===
+node_volumes/UPSTREAM/*/
+node_volumes/DOWNSTREAM/*/
+engine_workspace/input/*
+engine_workspace/output/*
+engine_workspace/archive/*
+
+# === Docker ===
+postgres_data/
+
+# === Python ===
+__pycache__/
+*.pyc
+*.pyo
+
+# === OS ===
+.DS_Store
+Thumbs.db
+/website/target/

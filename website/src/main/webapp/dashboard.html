@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - TeleBridge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Top Navbar -->
+        <nav class="top-navbar">
+            <div class="navbar-brand">
+                <i class="fa-solid fa-layer-group"></i> TeleBridge
+            </div>
+            
+            <div class="navbar-nav">
+                <a href="dashboard.html" class="nav-item active">
+                    <i class="fa-solid fa-chart-pie"></i> Overview
+                </a>
+                <a href="nodes.html" class="nav-item">
+                    <i class="fa-solid fa-server"></i> Network Nodes
+                </a>
+                <a href="rules.html" class="nav-item">
+                    <i class="fa-solid fa-filter"></i> Mediation Rules
+                </a>
+            </div>
+
+            <div class="navbar-user">
+                <a href="index.html" class="nav-item">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                </a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <h1 class="page-title">System Overview</h1>
+                <div class="user-profile">
+                    <div class="badge badge-success"><i class="fa-solid fa-circle-check"></i> Engine Active</div>
+                    <div class="avatar">
+                        <i class="fa-solid fa-user-astronaut"></i>
+                    </div>
+                </div>
+            </header>
+
+            <div class="stats-grid">
+                <div class="glass-panel stat-card">
+                    <div class="stat-icon primary">
+                        <i class="fa-solid fa-server"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 id="total-nodes">5</h3>
+                        <p>Active Network Nodes</p>
+                    </div>
+                </div>
+
+                <div class="glass-panel stat-card">
+                    <div class="stat-icon warning">
+                        <i class="fa-solid fa-filter"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 id="total-rules">3</h3>
+                        <p>Active Mediation Rules</p>
+                    </div>
+                </div>
+
+                <div class="glass-panel stat-card">
+                    <div class="stat-icon success">
+                        <i class="fa-solid fa-file-csv"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 id="total-cdrs">24,591</h3>
+                        <p>CDRs Processed Today</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel activity-feed">
+                <h2 class="activity-feed-header">Recent Engine Activity</h2>
+                <div class="activity-list" id="activity-list">
+                    <!-- Javascript will populate this -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- API Client & Dashboard Script -->
+    <script src="js/api.js?v=5"></script>
+    <script src="js/dashboard.js?v=5"></script>
+</body>
+</html>

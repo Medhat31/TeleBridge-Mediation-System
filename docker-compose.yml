@@ -1,0 +1,91 @@
+services:
+  # === PostgreSQL Database ===
+  mediation-db:
+    image: postgres:15-alpine
+    container_name: mediation-db
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./database/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - telecom-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # === CDR Generator (Python) ===
+  cdr-generator:
+    build: ./scripts
+    container_name: cdr-generator
+    depends_on:
+      mediation-db:
+        condition: service_healthy
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./node_volumes:/app/node_volumes
+    networks:
+      - telecom-net
+    restart: unless-stopped
+
+  # === Mediation Engine (Java) ===
+  mediation-engine:
+    build: ./core
+    container_name: mediation-engine
+    depends_on:
+      mediation-db:
+        condition: service_healthy
+      cdr-generator:
+        condition: service_started
+    environment:
+      WORKSPACE_ROOT: /app
+      HOST_PROJECT_ROOT: ${HOST_PROJECT_ROOT:-.}
+      DOCKER_NETWORK: telebridge-mediation-system_telecom-net
+      DB_URL: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./engine_workspace:/app/engine_workspace
+      - ./node_volumes:/app/node_volumes
+    networks:
+      - telecom-net
+    restart: unless-stopped
+
+  # === Web Dashboard (Tomcat) ===
+  mediation-website:
+    build: ./website
+    container_name: mediation-website
+    depends_on:
+      mediation-db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./node_volumes:/app/node_volumes
+    networks:
+      - telecom-net
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  telecom-net:
+    driver: bridge
