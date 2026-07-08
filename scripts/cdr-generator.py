@@ -1,3 +1,11 @@
+"""
+TeleBridge CDR Generator Simulator
+
+This script continuously simulates upstream network elements (MSCs and SMSCs)
+by generating Call Detail Records (CDRs) encoded in a custom Hex TLV (Tag-Length-Value) format.
+It queries the PostgreSQL database for active upstream nodes and writes realistic CDR files 
+into their respective volume directories, which are then picked up by the Mediation Engine.
+"""
 import os
 import time
 import random
@@ -22,8 +30,16 @@ if not os.path.exists(BASE_VOLUMES_DIR):
 # ==========================================
 def load_db_config():
     """
-    Loads database configuration.
-    Priority: Environment Variables > db.properties file.
+    Loads database configuration settings.
+    
+    This function attempts to resolve database credentials in the following order:
+    1. Environment Variables (injected by docker-compose, e.g., DB_HOST, DB_PORT).
+    2. Fallback to parsing the Java application's `db.properties` file if running locally
+       outside of Docker.
+       
+    Returns:
+        dict: A dictionary containing 'host', 'port', 'dbname', 'user', and 'password',
+              or None if the configuration could not be resolved.
     """
     # Check environment variables first (set by docker-compose)
     env_host = os.environ.get("DB_HOST")
@@ -83,13 +99,32 @@ def load_db_config():
 # 3. HEX TLV HELPER FUNCTIONS
 # ==========================================
 def int_to_tlv(tag, value, num_bytes):
-    """Converts an integer to a Hex TLV string."""
+    """
+    Encodes an integer into a Hex TLV (Tag-Length-Value) string format.
+    
+    Args:
+        tag (str): A 2-character hex string representing the tag (e.g., '01').
+        value (int): The integer value to encode.
+        num_bytes (int): The fixed size in bytes the value should occupy.
+        
+    Returns:
+        str: The encoded Hex TLV string (e.g., '01040000000A').
+    """
     val_hex = format(value, f'0{num_bytes*2}x').upper()
     len_hex = format(num_bytes, '02x').upper()
     return f"{tag}{len_hex}{val_hex}"
 
 def str_to_tlv(tag, text):
-    """Converts a standard string to an ASCII Hex TLV string."""
+    """
+    Encodes a standard UTF-8 string into an ASCII Hex TLV string format.
+    
+    Args:
+        tag (str): A 2-character hex string representing the tag (e.g., '03').
+        text (str): The plaintext string to encode.
+        
+    Returns:
+        str: The encoded Hex TLV string.
+    """
     val_hex = text.encode('utf-8').hex().upper()
     num_bytes = len(val_hex) // 2
     len_hex = format(num_bytes, '02x').upper()
@@ -99,7 +134,20 @@ def str_to_tlv(tag, text):
 # 4. CDR GENERATION LOGIC (WITH TEST CASES)
 # ==========================================
 def generate_hex_tlv_cdr(record_id, node_name):
-    """Generates a CDR, applying SMS rules and Mediation edge cases."""
+    """
+    Generates a single CDR encoded in Hex TLV format.
+    
+    It applies business rules depending on whether the source node is an MSC (Voice)
+    or an SMSC (Text). It also randomly injects mediation edge cases such as
+    zero-duration calls and emergency numbers to test the Mediation Engine's filtration logic.
+    
+    Args:
+        record_id (int): The sequential ID of the record within the file.
+        node_name (str): The name of the upstream node generating the CDR.
+        
+    Returns:
+        str: A fully constructed master TLV hex string representing the CDR.
+    """
     
     master_tag = "A0"
     
@@ -165,7 +213,16 @@ def generate_hex_tlv_cdr(record_id, node_name):
 # 5. DATABASE FETCH LOGIC
 # ==========================================
 def get_upstream_nodes(db_config):
-    """Fetches active upstream nodes and their exact types from PostgreSQL."""
+    """
+    Queries the PostgreSQL database to retrieve all active UPSTREAM network nodes.
+    
+    Args:
+        db_config (dict): The database connection parameters.
+        
+    Returns:
+        list: A list of dictionaries containing node 'id', 'name', and 'type',
+              or an empty list if the connection fails or no nodes are found.
+    """
     nodes = []
     try:
         conn = psycopg2.connect(
@@ -204,6 +261,16 @@ def get_upstream_nodes(db_config):
 # 6. MAIN CONTINUOUS LOOP
 # ==========================================
 def run_generator():
+    """
+    Main continuous execution loop for the CDR Generator.
+    
+    Workflow:
+    1. Connects to the database to discover active UPSTREAM nodes.
+    2. For each node, generates a batch of 50-100 random CDRs.
+    3. Writes the batch to a timestamped file within the node's specific volume directory.
+    4. Applies proper file permissions so the FTP server containers can read/delete them.
+    5. Sleeps for 15 seconds before beginning the next generation cycle.
+    """
     print("=== Starting TeleBridge Continuous CDR Generator ===")
     
     db_config = load_db_config()
@@ -239,8 +306,15 @@ def run_generator():
                 
                 with open(filepath, "w") as f:
                     for i in range(1, num_records + 1):
-                        f.write(generate_hex_tlv_cdr(i, node_name))
+                        cdr_record = generate_hex_tlv_cdr(i, node_name)
+                        f.write(cdr_record)
                         f.write("\n")
+                        
+                        # Introduce a 5% chance of duplicating the exact same CDR
+                        # This simulates network retries/glitches and helps test the engine's deduplication logic.
+                        if random.random() < 0.05:
+                            f.write(cdr_record)
+                            f.write("\n")
                         
                 # Use secure permissions instead of 777 (Wait, we NEED 777 so the ftp client can delete them)
                 os.chmod(filepath, 0o777)

@@ -65,7 +65,7 @@ async function apiFetch(endpoint, options = {}) {
     }
 
     if (!response.ok) {
-        const errorMsg = data && data.message ? data.message : `API Error: ${response.status} ${response.statusText}`;
+        const errorMsg = data && (data.message || data.error) ? (data.message || data.error) : `API Error: ${response.status} ${response.statusText}`;
         throw new Error(errorMsg);
     }
 

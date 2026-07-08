@@ -53,7 +53,7 @@ services:
         condition: service_started
     environment:
       WORKSPACE_ROOT: /app
-      HOST_PROJECT_ROOT: ${HOST_PROJECT_ROOT:-.}
+      HOST_PROJECT_ROOT: ${HOST_PROJECT_ROOT:-$PWD}
       DOCKER_NETWORK: telebridge-mediation-system_telecom-net
       DB_URL: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
       DB_USER: ${POSTGRES_USER}

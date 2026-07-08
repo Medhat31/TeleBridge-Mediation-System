@@ -73,8 +73,8 @@ The backend daemon runs continuously (every 15 seconds) executing this pipeline:
 git clone https://github.com/Medhat31/TeleBridge-Mediation-System.git
 cd TeleBridge-Mediation-System
 
-# 2. Set the host project root (required for Docker volume mounts)
-echo "HOST_PROJECT_ROOT=$(pwd)" >> .env
+# 2. Optional: Configure database settings
+# You can customize DB settings by creating a .env file (see Configuration section)
 
 # 3. Start everything with a single command
 docker compose up --build
@@ -153,8 +153,7 @@ DB_NAME=mediation_db
 DB_USER=telecom_user
 DB_PASSWORD=1234
 
-# Required Mount Path
-HOST_PROJECT_ROOT=/absolute/path/to/TeleBridge-Mediation-System
+
 ```
 
 | Variable | Default | Description |
@@ -164,7 +163,6 @@ HOST_PROJECT_ROOT=/absolute/path/to/TeleBridge-Mediation-System
 | `POSTGRES_DB` | `mediation_db` | PostgreSQL database name |
 | `DB_HOST` | `mediation-db` | Database hostname (Docker service name) |
 | `DB_PORT` | `5432` | Database port |
-| `HOST_PROJECT_ROOT` | `.` | **Required**: Absolute path to project root on host |
 
 ### Engine Configuration (`core/src/main/resources/app.properties`)
 
