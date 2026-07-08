@@ -6,9 +6,10 @@
 # Stage 1: Build the WAR file
 FROM maven:3.9-eclipse-temurin-11 AS build
 WORKDIR /app
-COPY pom.xml .
+COPY website/pom.xml .
 RUN mvn dependency:go-offline -B
-COPY src ./src
+COPY website/src ./src
+COPY db.properties ./src/main/resources/db.properties
 RUN mvn clean package -B
 
 # Stage 2: Runtime image with Tomcat 10.1 (Jakarta EE 10 support)

@@ -42,7 +42,9 @@ services:
 
   # === Mediation Engine (Java) ===
   mediation-engine:
-    build: ./core
+    build:
+      context: .
+      dockerfile: core/Dockerfile
     container_name: mediation-engine
     depends_on:
       mediation-db:
@@ -66,7 +68,9 @@ services:
 
   # === Web Dashboard (Tomcat) ===
   mediation-website:
-    build: ./website
+    build:
+      context: .
+      dockerfile: website/Dockerfile
     container_name: mediation-website
     depends_on:
       mediation-db:
