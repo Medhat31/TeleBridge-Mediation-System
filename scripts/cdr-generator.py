@@ -5,7 +5,7 @@ from datetime import datetime
 import psycopg2
 
 # ==========================================
-# 1. PATH CONFIGURATION
+# PATH CONFIGURATION
 # ==========================================
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -18,7 +18,7 @@ if not os.path.exists(BASE_VOLUMES_DIR):
     BASE_VOLUMES_DIR = os.path.join(REPO_ROOT, "node_volumes")
 
 # ==========================================
-# 2. DATABASE CONFIGURATION
+# DATABASE CONFIGURATION
 # ==========================================
 def load_db_config():
     """
@@ -80,7 +80,7 @@ def load_db_config():
         return None
 
 # ==========================================
-# 3. HEX TLV HELPER FUNCTIONS
+# HEX TLV HELPER FUNCTIONS
 # ==========================================
 def int_to_tlv(tag, value, num_bytes):
     """Converts an integer to a Hex TLV string."""
@@ -96,7 +96,7 @@ def str_to_tlv(tag, text):
     return f"{tag}{len_hex}{val_hex}"
 
 # ==========================================
-# 4. CDR GENERATION LOGIC (WITH TEST CASES)
+# CDR GENERATION LOGIC (WITH TEST CASES)
 # ==========================================
 def generate_hex_tlv_cdr(record_id, node_name):
     """Generates a CDR, applying SMS rules and Mediation edge cases."""
@@ -162,7 +162,7 @@ def generate_hex_tlv_cdr(record_id, node_name):
     return f"{master_tag}{master_len}{payload}"
 
 # ==========================================
-# 5. DATABASE FETCH LOGIC
+# DATABASE FETCH LOGIC
 # ==========================================
 def get_upstream_nodes(db_config):
     """Fetches active upstream nodes and their exact types from PostgreSQL."""
@@ -201,7 +201,7 @@ def get_upstream_nodes(db_config):
     return nodes
 
 # ==========================================
-# 6. MAIN CONTINUOUS LOOP
+# MAIN CONTINUOUS LOOP
 # ==========================================
 def run_generator():
     print("=== Starting TeleBridge Continuous CDR Generator ===")
@@ -239,8 +239,14 @@ def run_generator():
                 
                 with open(filepath, "w") as f:
                     for i in range(1, num_records + 1):
-                        f.write(generate_hex_tlv_cdr(i, node_name))
+                        cdr_line = generate_hex_tlv_cdr(i, node_name)
+                        f.write(cdr_line)
                         f.write("\n")
+                        
+                        # SCENARIO: Duplicate CDR (5% chance)
+                        if random.random() < 0.05:
+                            f.write(cdr_line)
+                            f.write("\n")
                         
                 # Use secure permissions instead of 777 (Wait, we NEED 777 so the ftp client can delete them)
                 os.chmod(filepath, 0o777)

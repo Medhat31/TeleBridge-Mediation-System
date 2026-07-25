@@ -120,7 +120,9 @@ public class NodeResource {
             }
             return Response.status(Response.Status.NOT_FOUND).build();
         } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("{\"error\":\"" + e.getMessage() + "\"}").build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                           .entity("{\"message\":\"" + e.getMessage() + "\"}")
+                           .build();
         }
     }
 }

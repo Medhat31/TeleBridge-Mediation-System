@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeleBridge Mediation System - Visual Documentation</title>
+    
+    <!-- Include Mermaid.js -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.8.0/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            theme: 'dark',
+            startOnLoad: true,
+            securityLevel: 'loose',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            },
+            sequence: {
+                useMaxWidth: true,
+                showSequenceNumbers: true
+            }
+        });
+    </script>
+
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-purple: #8b5cf6;
+            --accent-orange: #f59e0b;
+            --border-color: #475569;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            padding: 4rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(to right, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        section {
+            margin-bottom: 5rem;
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 32px;
+            background: var(--accent-blue);
+            border-radius: 4px;
+        }
+
+        p.desc {
+            margin-bottom: 2rem;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 900px;
+        }
+
+        /* Diagram Wrapper */
+        .diagram-wrapper {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+        }
+
+        .mermaid {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>TeleBridge Visual Documentation</h1>
+        <p>A comprehensive, diagram-driven explanation of the TeleBridge Mediation System. Understand the entire project, its container lifecycle, and data flow entirely through visuals.</p>
+    </header>
+
+    <div class="container">
+        
+        <!-- ==========================================
+             1. MACRO ARCHITECTURE DIAGRAM
+             ========================================== -->
+        <section id="architecture">
+            <h2>1. Complete System Architecture</h2>
+            <p class="desc">This diagram shows the complete bird's-eye view of the project. It maps out the core services, and how the Generator, Database, Web Dashboard, and Core Engine interlink with the dynamically spun-up FTP nodes.</p>
+            
+            <div class="diagram-wrapper">
+                <div class="mermaid">
+                    flowchart TD
+                        %% Define Styles
+                        classDef db fill:#4c1d95,stroke:#8b5cf6,stroke-width:2px;
+                        classDef java fill:#064e3b,stroke:#10b981,stroke-width:2px;
+                        classDef web fill:#1e3a8a,stroke:#3b82f6,stroke-width:2px;
+                        classDef python fill:#7c2d12,stroke:#f59e0b,stroke-width:2px;
+                        classDef ftp fill:#7f1d1d,stroke:#ef4444,stroke-width:2px;
+                        classDef user fill:#334155,stroke:#cbd5e1,stroke-width:2px;
+
+                        Browser["Admin / User Browser"]:::user
+                        
+                        subgraph System["TeleBridge Mediation System"]
+                            direction TB
+                            
+                            Tomcat["Web Dashboard\n(GUI & APIs)"]:::web
+                            DB[("PostgreSQL\nDatabase")]:::db
+                            Engine{"Core Mediation Engine\n(Java Daemon)"}:::java
+                            Generator["CDR Generator\n(Simulator)"]:::python
+                            
+                            subgraph NetworkNodes["Telecom Network Elements"]
+                                UpFTP["Upstream Nodes\n(MSC / SMSC)"]:::ftp
+                                DownFTP["Downstream Nodes\n(Billing Systems)"]:::ftp
+                            end
+
+                            Browser <==>|Manages System via| Tomcat
+                            Tomcat <-->|Saves Config to| DB
+                            Engine <-->|Reads Config from| DB
+                            
+                            Generator -.->|Simulates network traffic to| UpFTP
+                            
+                            Engine -->|1. Downloads Raw CDRs| UpFTP
+                            Engine -->|2. Uploads Filtered CSVs| DownFTP
+                        end
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             2. ENTITY RELATIONSHIP DIAGRAM (ERD)
+             ========================================== -->
+        <section id="erd">
+            <h2>2. Database Schema (ERD)</h2>
+            <p class="desc">The relational structure of the PostgreSQL database that holds all configuration, metrics, and routing rules for the system.</p>
+            
+            <div class="diagram-wrapper">
+                <div class="mermaid">
+                    erDiagram
+                        Nodes ||--o{ Mediation_Rules : "Acts as Source"
+                        Nodes ||--o{ Mediation_Rules : "Acts as Destination"
+
+                        Nodes {
+                            int node_id PK
+                            string node_name
+                            string node_type
+                            string protocol
+                            string ip_address
+                            int port
+                            boolean is_active
+                        }
+
+                        Mediation_Rules {
+                            int rule_id PK
+                            int source_node_id FK
+                            int destination_node_id FK
+                            boolean filter_zero_duration
+                            boolean filter_emergency
+                            boolean is_active
+                        }
+
+                        Admins {
+                            int admin_id PK
+                            string email
+                            string password
+                        }
+
+                        Daily_Metrics {
+                            date metric_date PK
+                            int total_cdrs_processed
+                        }
+
+                        Activity_Log {
+                            int id PK
+                            timestamp log_time
+                            string message
+                            string log_type
+                        }
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             3. DYNAMIC CONTAINER CREATION
+             ========================================== -->
+        <section id="container-lifecycle">
+            <h2>3. Dynamic FTP Container Lifecycle</h2>
+            <p class="desc">The most complex part of TeleBridge is how it provisions its own infrastructure. When an Admin creates a new "Node" in the Web UI, the Java Engine detects it and automatically launches a new Docker Container specifically for that Node using the Host's Docker Socket.</p>
+
+            <div class="diagram-wrapper">
+                <div class="mermaid">
+                    sequenceDiagram
+                        autonumber
+                        
+                        actor Admin as Admin User (Browser)
+                        participant UI as Web Dashboard
+                        participant DB as PostgreSQL DB
+                        participant Engine as Mediation Engine
+                        participant Docker as Host Docker Socket
+                        participant FTP as New FTP Container
+
+                        Note over Admin, FTP: Node Creation & Provisioning Flow
+
+                        Admin->>UI: Fills "Create Node" Form<br/>(MSC, Upstream, FTP)
+                        UI->>DB: INSERT INTO Nodes
+                        
+                        loop Every 15 seconds
+                            Engine->>DB: SELECT * FROM Nodes WHERE is_active=true
+                            DB-->>Engine: Returns new MSC Node (ID: 28)
+                            
+                            Engine->>Docker: Checks if container "telebridge_upstream_28" exists
+                            Docker-->>Engine: Container not found
+                            
+                            Note over Engine: ContainerManager.java executes ProcessBuilder
+                            
+                            Engine->>Docker: Runs: "docker run -d --name telebridge_upstream_28..."
+                            Docker->>FTP: Spins up Atmoz/SFTP or Fauria/VSFTPD image
+                            FTP-->>Docker: Container Started
+                            Docker-->>Engine: Success!
+                            
+                            Note over Engine, FTP: Engine dynamically binds the Host's "node_volumes/UPSTREAM/28"<br/>directory into the new container's /home/user/share folder.
+                        end
+                        
+                        Admin->>UI: Deletes Node via Dashboard
+                        UI->>DB: DELETE FROM Nodes
+                        Engine->>DB: Fetches active nodes
+                        Engine->>Docker: Detects orphan container "telebridge_upstream_28"
+                        Engine->>Docker: Runs: "docker rm -f telebridge_upstream_28"
+                        Docker->>FTP: Kills & Removes Container
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             4. CDR GENERATOR FLOW
+             ========================================== -->
+        <section id="generator-flow">
+            <h2>4. CDR Generator Operation</h2>
+            <p class="desc">The Python CDR Generator simulates network traffic. It actively polls the database to discover which Upstream Nodes are currently marked as "active", and only generates CDR files inside the specific mounted host volumes belonging to those active nodes.</p>
+
+            <div class="diagram-wrapper">
+                <div class="mermaid">
+                    sequenceDiagram
+                        autonumber
+                        participant DB as PostgreSQL DB
+                        participant Gen as CDR Generator (Python)
+                        participant FS as Host Filesystem (node_volumes/)
+
+                        loop Every 15 seconds
+                            Gen->>DB: 1. SELECT node_id, node_name FROM Nodes WHERE type='UPSTREAM' AND is_active=true
+                            
+                            alt No Active Nodes
+                                DB-->>Gen: Returns Empty List
+                                Note over Gen: Logs: "No active nodes found."
+                            else Active Nodes Found
+                                DB-->>Gen: Returns Node ID: 28, Name: MSC_Cairo
+                                
+                                Note over Gen: 2. Generates 50-100 fake Hex TLV Records
+                                Gen->>FS: 3. Writes records to the active node's directory:<br/>node_volumes/UPSTREAM/28/MSC_20260721.tlv
+                            end
+                        end
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             5. THE CDR DATA LIFECYCLE
+             ========================================== -->
+        <section id="cdr-lifecycle">
+            <h2>5. The CDR File Lifecycle (End-to-End)</h2>
+            <p class="desc">Follow a single CDR record from the moment it is generated by the Python simulator, through the FTP servers, into the Engine's parser and filters, and finally arriving as a clean CSV at the Billing system. <strong>Pay attention to the specific physical file locations in each phase.</strong></p>
+
+            <div class="diagram-wrapper">
+                <div class="mermaid">
+                    stateDiagram-v2
+                        direction TB
+
+                        %% Styling
+                        classDef py fill:#7c2d12,stroke:#f59e0b,stroke-width:2px,color:white;
+                        classDef ftp fill:#7f1d1d,stroke:#ef4444,stroke-width:2px,color:white;
+                        classDef java fill:#064e3b,stroke:#10b981,stroke-width:2px,color:white;
+                        classDef csv fill:#1e3a8a,stroke:#3b82f6,stroke-width:2px,color:white;
+
+                        state "1. PYTHON GENERATOR" as Gen {
+                            state "Constructs Hex TLV string" as Hex
+                            state "Saves file locally to:\n📍 node_volumes/UPSTREAM/{node_id}/MSC_...tlv" as Save
+                            Hex --> Save
+                        }
+                        class Gen py
+
+                        state "2. UPSTREAM FTP CONTAINER" as UpFTP {
+                            state "Due to Docker Volume bindings, the file instantly\nappears in the FTP server's folder:\n📍 /home/user/share/MSC_...tlv" as Appears
+                        }
+                        class UpFTP ftp
+
+                        state "3. MEDIATION ENGINE (JAVA)" as Engine {
+                            state "Phase 3: Download" as Download
+                            state "Downloads via FTP client to:\n📍 engine_workspace/input/MSC_...tlv\n(Deletes file from FTP Server)" as DownloadAction
+                            
+                            state "Phase 4: Parsing" as Parsing
+                            state "Decodes Hex TLV from the input directory\ninto Java Objects in Memory" as ParseAction
+                            
+                            state "Phase 5: Filtering" as Filtering
+                            state "Drops Duplicate records\nDrops 0-second voice calls\nDrops Emergency Calls" as FilterAction
+                            
+                            state "Phase 6: Export" as Export
+                            state "Converts Filtered Java Objects to CSV and saves to:\n📍 engine_workspace/output/MSC_...csv" as ExportAction
+                            
+                            state "Phase 7: Archival" as Archive
+                            state "Moves original binary .tlv file to backup folder:\n📍 engine_workspace/archive/MSC_...tlv" as ArchiveAction
+
+                            Download --> DownloadAction
+                            DownloadAction --> Parsing
+                            Parsing --> ParseAction
+                            ParseAction --> Filtering
+                            Filtering --> FilterAction
+                            FilterAction --> Export
+                            Export --> ExportAction
+                            ExportAction --> Archive
+                            Archive --> ArchiveAction
+                        }
+                        class Engine java
+
+                        state "4. DOWNSTREAM FTP CONTAINER" as DownFTP {
+                            state "Engine connects via FTP to the Billing Node.\nUploads the final .csv file to the Downstream container." as Upload
+                            state "File maps back to the Host volume at:\n📍 node_volumes/DOWNSTREAM/{node_id}/MSC_...csv" as Done
+                            Upload --> Done
+                        }
+                        class DownFTP csv
+
+                        %% Links between systems
+                        Gen --> UpFTP : Volume Bound
+                        UpFTP --> Engine : Engine Polls
+                        Engine --> DownFTP : File Upload
+                </div>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>
